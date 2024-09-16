@@ -1,51 +1,31 @@
 package main
 
 import (
-	"net/http"
-	"os"
-	"time"
-
 	"github.com/labstack/echo/v4"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"net/http"
+	"os"
 )
 
-type Album struct {
-	ID    uint64 `gorm:"primaryKey"`
-	Title string
+type Trabalhador struct {
+	ID           uint64         `gorm:"primaryKey"`
+	Nome         string         `gorm:"not null;"`
+	Cpf          string         `gorm:"not null;"`
+	Empresa      []Empresa      `gorm:"ForeignKey:ID;"`
+	Departamento []Departamento `gorm:"ForeignKey:ID;"`
 }
 
-type Foto struct {
-	ID      uint64 `gorm:"primaryKey"`
-	AlbumID uint64 `gorm:"foreignKey:cu"`
-	Uri     string
-
-	Album Album
+type Empresa struct {
+	ID          uint64 `gorm:"primaryKey"`
+	RazaoSocial string `gorm:"not null;"`
+	Cnpj        string `gorm:"not null;"`
 }
 
-type Usuario struct {
-	ID        uint64 `gorm:"primaryKey"`
-	FotoID    uint64 `gorm:"primaryKey"`
-	Nome      string
-	Email     string
-	Data_nasc time.Time
-	Website   string
-	Gender    string
-	Telephone string
-
-	Foto Foto
-	//Seguidores []Seguidores `gorm:"foreignKey:UserID"`
-	//Seguidos   []Seguidores `gorm:"foreignKey:FollowerID"`
+type Departamento struct {
+	ID   uint64 `gorm:"primaryKey"`
+	Nome string `gorm:"not null;"`
 }
-
-//type Seguidores struct {
-//	ID         uint64 `gorm:"primaryKey"`
-//	SeguidoID  uint64 `gorm:"foreignKey:UsuarioID"`
-//	SeguidorID uint64 `gorm:"foreignKey:SeguidorID"`
-//
-//	Usuario  Usuario `gorm:"foreignKey:UserID"`
-//	Seguidor Usuario `gorm:"foreignKey:FollowerID"`
-//}
 
 func getDB() (*gorm.DB, error) {
 	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
@@ -66,7 +46,7 @@ func main() {
 		panic("Failed to connect to database")
 	}
 
-	db.AutoMigrate(&Album{}, &Foto{}, &Usuario{})
+	db.AutoMigrate(&Trabalhador{}, &Empresa{}, &Departamento{})
 
 	e := echo.New()
 
