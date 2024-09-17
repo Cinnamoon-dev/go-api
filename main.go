@@ -1,56 +1,37 @@
 package main
 
 import (
+	"github.com/Cinnamoon-dev/go-api/db"
+	"github.com/Cinnamoon-dev/go-api/handlers"
+	"github.com/Cinnamoon-dev/go-api/repositories"
+	"github.com/Cinnamoon-dev/go-api/routes"
+	"github.com/Cinnamoon-dev/go-api/services"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"net/http"
+	"log"
 	"os"
 )
 
-type Trabalhador struct {
-	ID           uint64         `gorm:"primaryKey"`
-	Nome         string         `gorm:"not null;"`
-	Cpf          string         `gorm:"not null;"`
-	Empresa      []Empresa      `gorm:"ForeignKey:ID;"`
-	Departamento []Departamento `gorm:"ForeignKey:ID;"`
-}
+func main() {
 
-type Empresa struct {
-	ID          uint64 `gorm:"primaryKey"`
-	RazaoSocial string `gorm:"not null;"`
-	Cnpj        string `gorm:"not null;"`
-}
-
-type Departamento struct {
-	ID   uint64 `gorm:"primaryKey"`
-	Nome string `gorm:"not null;"`
-}
-
-func getDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	err := godotenv.Load()
 	if err != nil {
-		return nil, err
+		log.Fatal("Error loading .env file")
 	}
 
-	return db, nil
-}
-
-func home(c echo.Context) error {
-	return c.JSON(http.StatusOK, echo.Map{"message": "hello"})
-}
-
-func main() {
-	db, err := getDB()
+	database, err := db.Init()
 	if err != nil {
 		panic("Failed to connect to database")
 	}
 
-	db.AutoMigrate(&Trabalhador{}, &Empresa{}, &Departamento{})
+	trabalhadorRepo := repositories.NewTrabalhadorRepository(database)
+	trabalhadorService := services.NewTrabalhadorService(trabalhadorRepo)
+	trabalhadorHandler := handlers.NewTrabalhadorHandler(trabalhadorService)
+
+	port := os.Getenv("PORT")
 
 	e := echo.New()
+	routes.RegisterRoutes(e, trabalhadorHandler)
 
-	e.GET("/", home)
-
-	e.Logger.Fatal(e.Start(os.Getenv("PORT")))
+	e.Logger.Fatal(e.Start(":" + port))
 }
