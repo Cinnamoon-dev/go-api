@@ -7,7 +7,7 @@ import (
 )
 
 func Init() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{}) //cria o banco de dados caso nao exista
 	if err != nil {
 		return nil, err
 	}
