@@ -1,16 +1,17 @@
 package repositories
 
 import (
+	"fmt"
 	"github.com/Cinnamoon-dev/go-api/models"
 	"gorm.io/gorm"
 )
 
 // Registra os metodos que iram compor o trabalhador Repositorio obrigando a serem implementados
 type TrabalhadorRepository interface {
-	Insert(trabalhador models.Trabalhador) error
+	Insert(trabalhador models.Trabalhador) (models.Trabalhador, error)
 	GetAll() ([]models.Trabalhador, error)
 	GetByCpf(cpf string) (models.Trabalhador, error)
-	Update(trabalhador models.Trabalhador) (models.Trabalhador, error)
+	Update(trabalhador models.Trabalhador, cpf string) (models.Trabalhador, error)
 	Delete(cpf string) (models.Trabalhador, error)
 }
 
@@ -24,8 +25,30 @@ func NewTrabalhadorRepository(db *gorm.DB) TrabalhadorRepository {
 }
 
 // Metodo de insert do trabalhador, recebendo um trabalhador como parametro, chamando a conexao do banco relacionado ao repositorio do trabalhador e inserindo os valores no banco
-func (r *trabalhadorRepository) Insert(trabalhador models.Trabalhador) error {
-	return r.db.Create(&trabalhador).Error
+func (r *trabalhadorRepository) Insert(trabalhador models.Trabalhador) (models.Trabalhador, error) {
+	var existingEmpresa models.Empresa
+	var existingDepartamento models.Departamento
+
+	if trabalhador.EmpresaID != 0 {
+		if err := r.db.Where("id = ?", trabalhador.EmpresaID).First(&existingEmpresa).Error; err != nil {
+			return trabalhador, fmt.Errorf("empresa com ID %d não encontrada", trabalhador.EmpresaID)
+		}
+		trabalhador.EmpresaID = existingEmpresa.ID
+	}
+
+	if trabalhador.DepartamentoID != 0 {
+		if err := r.db.Where("id = ?", trabalhador.DepartamentoID).First(&existingDepartamento).Error; err != nil {
+			return trabalhador, fmt.Errorf("departamento com ID %d não encontrado", trabalhador.DepartamentoID)
+		}
+		trabalhador.DepartamentoID = existingDepartamento.ID
+	}
+
+	if err := r.db.Create(&trabalhador).Error; err != nil {
+		return trabalhador, err
+	}
+	err := r.db.Preload("Departamento").Preload("Empresa").Where("cpf = ?", trabalhador.Cpf).First(&trabalhador).Error
+
+	return trabalhador, err
 }
 
 func (r *trabalhadorRepository) GetAll() ([]models.Trabalhador, error) {
@@ -50,28 +73,39 @@ func (r *trabalhadorRepository) GetByCpf(cpf string) (models.Trabalhador, error)
 	return trabalhador, err
 }
 
-func (r *trabalhadorRepository) Update(trabalhador models.Trabalhador) (models.Trabalhador, error) {
+func (r *trabalhadorRepository) Update(trabalhador models.Trabalhador, cpfAntigo string) (models.Trabalhador, error) {
 	var existingTrabalhador models.Trabalhador
+	var existingEmpresa models.Empresa
+	var existingDepartamento models.Departamento
 
-	// Buscar o trabalhador existente com base no ID e do identificador único)
-	err := r.db.Where("cpf = ?", trabalhador.Cpf).First(&existingTrabalhador).Error
+	err := r.db.Where("cpf = ?", cpfAntigo).First(&existingTrabalhador).Error
 	if err != nil {
-		return trabalhador, err // Retorna erro se o trabalhador não for encontrado
+		return trabalhador, fmt.Errorf("trabalhador com CPF %s não encontrado", cpfAntigo)
 	}
 
-	// Atualizar apenas os campos fornecidos
-	err = r.db.Model(&existingTrabalhador).Updates(map[string]interface{}{
-		"cpf":             trabalhador.Cpf,
-		"nome":            trabalhador.Nome,
-		"empresa_id":      trabalhador.EmpresaID,      // Atualiza apenas o ID da empresa, não o objeto completo
-		"departamento_id": trabalhador.DepartamentoID, // Atualiza apenas o ID do departamento, não o objeto completo
-	}).Error
-
-	if err != nil {
-		return models.Trabalhador{}, err
+	if trabalhador.EmpresaID != 0 {
+		if err := r.db.Where("id = ?", trabalhador.EmpresaID).First(&existingEmpresa).Error; err != nil {
+			return trabalhador, fmt.Errorf("empresa com ID %d não encontrada", trabalhador.EmpresaID)
+		}
+		existingTrabalhador.EmpresaID = trabalhador.EmpresaID
 	}
 
-	// Retorna o trabalhador atualizado
+	if trabalhador.DepartamentoID != 0 {
+		if err := r.db.Where("id = ?", trabalhador.DepartamentoID).First(&existingDepartamento).Error; err != nil {
+			return trabalhador, fmt.Errorf("departamento com ID %d não encontrado", trabalhador.DepartamentoID)
+		}
+		existingTrabalhador.DepartamentoID = trabalhador.DepartamentoID
+	}
+
+	existingTrabalhador.Nome = trabalhador.Nome
+	existingTrabalhador.Cpf = trabalhador.Cpf
+
+	err = r.db.Save(&existingTrabalhador).Error
+	if err != nil {
+		return trabalhador, fmt.Errorf("falha ao atualizar trabalhador: %v", err)
+	}
+	err = r.db.Preload("Departamento").Preload("Empresa").Where("cpf = ?", existingTrabalhador.Cpf).First(&existingTrabalhador).Error
+
 	return existingTrabalhador, nil
 }
 

@@ -1,0 +1,62 @@
+
+### Inserir uma nova Empresa 1
+POST http://localhost:6000/empresas
+Content-Type: application/json
+
+{
+  "razao_social": "Leandros TI LTDA",
+  "cnpj": "87572408000116"
+}
+
+###
+
+### Inserir uma nova Empresa 2
+POST http://localhost:6000/empresas
+Content-Type: application/json
+
+{
+  "razao_social": "Karens Financas LTDA",
+  "cnpj": "72073585000180"
+}
+
+###
+
+### Inserir uma nova Empresa 3
+POST http://localhost:6000/empresas
+Content-Type: application/json
+
+{
+  "razao_social": "Henriques Financas LTDA",
+  "cnpj": "99896892000118"
+}
+
+###
+
+### Listar todas as Empresas
+GET http://localhost:6000/empresas
+Accept: application/json
+
+###
+
+### Buscar uma Empresa pelo CNPJ
+GET http://localhost:6000/empresas/99896892000118
+Accept: application/json
+
+###
+
+### Atualizar uma Empresa existente pelo CNPJ
+PUT http://localhost:6000/empresas/99896892000118
+Content-Type: application/json
+
+{
+  "razao_social": "Henriques LTDA",
+  "cnpj": "68308761000149"
+}
+
+###
+
+### Excluir uma Empresa
+DELETE http://localhost:6000/empresas/68308761000149
+Accept: application/json
+
+###

@@ -9,7 +9,7 @@ type EmpresaService interface {
 	InsertEmpresa(empresa models.Empresa) error
 	GetAllEmpresas() ([]models.Empresa, error)
 	GetEmpresaByCnpj(cnpj string) (models.Empresa, error)
-	UpdateEmpresa(empresa models.Empresa) (models.Empresa, error)
+	UpdateEmpresa(empresa models.Empresa, cnpj string) (models.Empresa, error)
 	DeleteEmpresa(cnpj string) (models.Empresa, error)
 }
 
@@ -33,8 +33,8 @@ func (s *empresaService) GetEmpresaByCnpj(cnpj string) (models.Empresa, error) {
 	return s.repo.GetByCnpj(cnpj)
 }
 
-func (s *empresaService) UpdateEmpresa(empresa models.Empresa) (models.Empresa, error) {
-	return s.repo.Update(empresa)
+func (s *empresaService) UpdateEmpresa(empresa models.Empresa, cnpj string) (models.Empresa, error) {
+	return s.repo.Update(empresa, cnpj)
 }
 
 func (s *empresaService) DeleteEmpresa(cnpj string) (models.Empresa, error) {

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"github.com/Cinnamoon-dev/go-api/models"
 	"gorm.io/gorm"
 )
@@ -9,7 +10,7 @@ type EmpresaRepository interface {
 	Insert(empresa models.Empresa) error
 	GetAll() ([]models.Empresa, error)
 	GetByCnpj(cnpj string) (models.Empresa, error)
-	Update(empresa models.Empresa) (models.Empresa, error)
+	Update(empresa models.Empresa, cnpj string) (models.Empresa, error)
 	Delete(cnpj string) (models.Empresa, error)
 }
 
@@ -44,31 +45,34 @@ func (r *empresaRepository) GetByCnpj(cnpj string) (models.Empresa, error) {
 	return empresa, nil
 }
 
-func (r *empresaRepository) Update(empresa models.Empresa) (models.Empresa, error) {
+func (r *empresaRepository) Update(empresa models.Empresa, cnpjAntigo string) (models.Empresa, error) {
 	var existingEmpresa models.Empresa
 
-	err := r.db.Where("cnpj = ?", empresa.Cnpj).First(&existingEmpresa).Error
-	if err != nil {
-		return empresa, err
+	if err := r.db.Where("cnpj = ?", cnpjAntigo).First(&existingEmpresa).Error; err != nil {
+		return existingEmpresa, err
 	}
 
-	err = r.db.Model(&existingEmpresa).Updates(map[string]interface{}{
-		"razao_social": empresa.RazaoSocial,
-		"cnpj":         empresa.Cnpj,
-	}).Error
+	existingEmpresa.RazaoSocial = empresa.RazaoSocial
+	existingEmpresa.Cnpj = empresa.Cnpj
 
-	if err != nil {
-		return models.Empresa{}, err
+	if err := r.db.Save(&existingEmpresa).Error; err != nil {
+		return existingEmpresa, err
 	}
-	return empresa, nil
+
+	return existingEmpresa, nil
 }
 
 func (r *empresaRepository) Delete(cnpj string) (models.Empresa, error) {
+	var trabalhador models.Trabalhador
 	var empresa models.Empresa
 
 	err := r.db.Where("cnpj = ?", cnpj).First(&empresa).Error
 	if err != nil {
 		return empresa, err
+	}
+
+	if err = r.db.Where("empresa_id = ?", empresa.ID).First(&trabalhador).Error; trabalhador.Nome != "" {
+		return empresa, fmt.Errorf("Não é possível excluir a empresa com ID %d, pois há trabalhadores associados a ela", trabalhador.EmpresaID)
 	}
 
 	err = r.db.Delete(&empresa).Error

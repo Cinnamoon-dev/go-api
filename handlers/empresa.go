@@ -19,12 +19,12 @@ func (h *EmpresaHandler) Insert(c echo.Context) error {
 	var empresa models.Empresa
 
 	if err := c.Bind(&empresa); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid input"})
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Invalid input", "error": err.Error()})
 	}
 
 	err := h.service.InsertEmpresa(empresa)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to inser empresa"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to inser empresa", "error": err.Error()})
 	}
 	return c.JSON(http.StatusCreated, empresa)
 }
@@ -32,7 +32,7 @@ func (h *EmpresaHandler) Insert(c echo.Context) error {
 func (h *EmpresaHandler) GetAll(c echo.Context) error {
 	empresas, err := h.service.GetAllEmpresas()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to get empresas"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to get empresas", "error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, empresas)
 }
@@ -41,7 +41,7 @@ func (h *EmpresaHandler) GetByCnpj(c echo.Context) error {
 	cnpj := c.Param("cnpj")
 	empresa, err := h.service.GetEmpresaByCnpj(cnpj)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to get empresa"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to get empresa", "error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, empresa)
 }
@@ -49,25 +49,27 @@ func (h *EmpresaHandler) GetByCnpj(c echo.Context) error {
 func (h *EmpresaHandler) Update(c echo.Context) error {
 	var empresa models.Empresa
 	if err := c.Bind(&empresa); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid input"})
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Invalid input", "error": err.Error()})
 	}
 
 	cnpj := c.Param("cnpj")
-	empresa.Cnpj = cnpj
 
-	updatedEmpresa, err := h.service.UpdateEmpresa(empresa)
+	updatedEmpresa, err := h.service.UpdateEmpresa(empresa, cnpj)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to update empresa"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to update empresa", "error": err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, updatedEmpresa)
 }
 
 func (h *EmpresaHandler) Delete(c echo.Context) error {
+	var empresa models.Empresa
+
 	cnpj := c.Param("cnpj")
+
 	empresa, err := h.service.DeleteEmpresa(cnpj)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to delete empresa"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to delete empresa", "error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, empresa)
 }

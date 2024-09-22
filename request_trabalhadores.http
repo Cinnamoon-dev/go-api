@@ -1,0 +1,78 @@
+### Inserir um Novo Trabalhador 1
+POST http://localhost:6000/trabalhadores
+Content-Type: application/json
+
+{
+  "nome": "Pedro Leandro",
+  "cpf": "63450397052",
+  "empresa_id": 1,
+  "departamento_id": 2
+}
+###
+
+### Inserir um Novo Trabalhador 2
+POST http://localhost:6000/trabalhadores
+Content-Type: application/json
+
+{
+  "nome": "Daniel Leandro",
+  "cpf": "35924667049",
+  "empresa_id": 1,
+  "departamento_id": 3
+}
+###
+
+### Inserir um Novo Trabalhador 3
+POST http://localhost:6000/trabalhadores
+Content-Type: application/json
+
+{
+  "nome": "Karen Ribeiro",
+  "cpf": "02749084091",
+  "empresa_id": 2,
+  "departamento_id": 4
+}
+###
+
+### Inserir um Novo Trabalhador 3
+POST http://localhost:6000/trabalhadores
+Content-Type: application/json
+
+{
+  "nome": "Pedro Henrique",
+  "cpf": "01978900082",
+  "empresa_id": 6,
+  "departamento_id": 4
+}
+###
+
+### Listar Todos os Trabalhadores
+GET http://localhost:6000/trabalhadores
+Accept: application/json
+
+###
+
+### Buscar um Trabalhador pelo CPF
+GET http://localhost:6000/trabalhadores/01978900082
+Accept: application/json
+
+###
+
+### Atualizar um Trabalhador Existente
+PUT http://localhost:6000/trabalhadores/01978900082
+Content-Type: application/json
+
+{
+  "nome": "Pedro Barreto",
+  "cpf": "76550804027",
+  "empresa_id": 1,
+  "departamento_id": 2
+}
+
+###
+
+### Excluir um Trabalhador
+DELETE http://localhost:6000/trabalhadores/01978900082
+Accept: application/json
+
+###

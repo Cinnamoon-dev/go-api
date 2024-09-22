@@ -6,10 +6,10 @@ import (
 )
 
 type TrabalhadorService interface {
-	InsertTrabalhador(trabalhador models.Trabalhador) error
+	InsertTrabalhador(trabalhador models.Trabalhador) (models.Trabalhador, error)
 	GetAllTrabalhadores() ([]models.Trabalhador, error)
 	GetTrabalhadorByCpf(cpf string) (models.Trabalhador, error)
-	UpdateTrabalhador(trabalhador models.Trabalhador) (models.Trabalhador, error)
+	UpdateTrabalhador(trabalhador models.Trabalhador, cpf string) (models.Trabalhador, error)
 	DeleteTrabalhador(cpf string) (models.Trabalhador, error)
 }
 
@@ -21,7 +21,7 @@ func NewTrabalhadorService(repo repositories.TrabalhadorRepository) TrabalhadorS
 	return &trabalhadorService{repo: repo}
 }
 
-func (s *trabalhadorService) InsertTrabalhador(trabalhador models.Trabalhador) error {
+func (s *trabalhadorService) InsertTrabalhador(trabalhador models.Trabalhador) (models.Trabalhador, error) {
 	return s.repo.Insert(trabalhador)
 }
 
@@ -33,8 +33,8 @@ func (s *trabalhadorService) GetTrabalhadorByCpf(cpf string) (models.Trabalhador
 	return s.repo.GetByCpf(cpf)
 }
 
-func (s *trabalhadorService) UpdateTrabalhador(trabalhador models.Trabalhador) (models.Trabalhador, error) {
-	return s.repo.Update(trabalhador)
+func (s *trabalhadorService) UpdateTrabalhador(trabalhador models.Trabalhador, cpf string) (models.Trabalhador, error) {
+	return s.repo.Update(trabalhador, cpf)
 }
 
 func (s *trabalhadorService) DeleteTrabalhador(cpf string) (models.Trabalhador, error) {

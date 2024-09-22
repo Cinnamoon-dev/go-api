@@ -18,12 +18,12 @@ func NewTrabalhadorHandler(s services.TrabalhadorService) *TrabalhadorHandler {
 func (h *TrabalhadorHandler) Insert(c echo.Context) error {
 	var trabalhador models.Trabalhador
 	if err := c.Bind(&trabalhador); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Invalid input"})
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Invalid input", "error": err.Error()})
 	}
 
-	err := h.service.InsertTrabalhador(trabalhador)
+	trabalhador, err := h.service.InsertTrabalhador(trabalhador)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to insert trabalhador"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to insert trabalhador", "error": err.Error()})
 	}
 
 	return c.JSON(http.StatusCreated, trabalhador)
@@ -32,7 +32,7 @@ func (h *TrabalhadorHandler) Insert(c echo.Context) error {
 func (h *TrabalhadorHandler) GetAll(c echo.Context) error {
 	trabalhadores, err := h.service.GetAllTrabalhadores()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to fetch trabalhadores"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to fetch trabalhadores", "error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, trabalhadores)
 }
@@ -41,7 +41,7 @@ func (h *TrabalhadorHandler) GetByCpf(c echo.Context) error {
 	cpf := c.Param("cpf")
 	trabalhador, err := h.service.GetTrabalhadorByCpf(cpf)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, echo.Map{"error": "Trabalhador not found"})
+		return c.JSON(http.StatusNotFound, echo.Map{"message": "Trabalhador not found", "error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, trabalhador)
 }
@@ -49,15 +49,14 @@ func (h *TrabalhadorHandler) GetByCpf(c echo.Context) error {
 func (h *TrabalhadorHandler) Update(c echo.Context) error {
 	var trabalhador models.Trabalhador
 	if err := c.Bind(&trabalhador); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid input"})
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Invalid input", "error": err.Error()})
 	}
 
 	cpf := c.Param("cpf")
-	trabalhador.Cpf = cpf
 
-	updatedTrabalhador, err := h.service.UpdateTrabalhador(trabalhador)
+	updatedTrabalhador, err := h.service.UpdateTrabalhador(trabalhador, cpf)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to update trabalhador"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to update trabalhador", "error": err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, updatedTrabalhador)
@@ -66,7 +65,7 @@ func (h *TrabalhadorHandler) Update(c echo.Context) error {
 func (h *TrabalhadorHandler) Delete(c echo.Context) error {
 	trabalhador, err := h.service.DeleteTrabalhador(c.Param("cpf"))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to delete trabalhador"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to delete trabalhador", "error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, trabalhador)
 }
