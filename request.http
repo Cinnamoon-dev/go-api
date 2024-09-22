@@ -1,0 +1,63 @@
+### Listar Todos os Trabalhadores
+GET http://localhost:6000/trabalhadores
+Accept: application/json
+
+###
+
+### Buscar um Trabalhador pelo CPF
+GET http://localhost:6000/trabalhadores/12345678900
+Accept: application/json
+
+###
+
+### Inserir um Novo Trabalhador
+POST http://localhost:6000/trabalhadores
+Content-Type: application/json
+
+{
+  "nome": "João Silva",
+  "cpf": "12345678900",
+  "empresa": [
+    {
+      "razao_social": "Minha Empresa",
+      "cnpj": "9876543210001"
+    }
+  ],
+  "departamento": [
+    {
+      "nome": "TI"
+    }
+  ]
+}
+
+###
+
+### Atualizar um Trabalhador Existente
+PUT http://localhost:6000/trabalhadores/2531123412
+Content-Type: application/json
+
+{
+  "nome": "João Silva Atualizado",
+  "cpf": "12345678900",
+  "empresa": [
+    {
+      "id": 1,  // Assumindo que a empresa já existe
+      "razao_social": "Minha Empresa Atualizada",
+      "cnpj": "9876543210001"
+    }
+  ],
+  "departamento": [
+    {
+      "id": 1,  // Assumindo que o departamento já existe
+      "nome": "Desenvolvimento"
+    }
+  ]
+}
+
+###
+
+### Excluir um Trabalhador
+DELETE http://localhost:6000/trabalhadores/24123123
+Accept: application/json
+
+###
