@@ -12,6 +12,7 @@ import (
 	"os"
 )
 
+// inicializacao da aplicacao
 func main() {
 
 	err := godotenv.Load()
@@ -28,10 +29,21 @@ func main() {
 	trabalhadorService := services.NewTrabalhadorService(trabalhadorRepo)
 	trabalhadorHandler := handlers.NewTrabalhadorHandler(trabalhadorService)
 
+	empresaRepo := repositories.NewEmpresaRepository(database)
+	empresaService := services.NewEmpresaService(empresaRepo)
+	empresaHandler := handlers.NewEmpresaHandler(empresaService)
+
+	departamentoRepo := repositories.NewDepartamentoRepository(database)
+	departamentoService := services.NewDepartamentoService(departamentoRepo)
+	departamentoHandler := handlers.NewDepartamentoHandler(departamentoService)
+
 	port := os.Getenv("PORT")
 
 	e := echo.New()
-	routes.RegisterRoutes(e, trabalhadorHandler)
+
+	routes.TrabalhadorRegisterRoutes(e, trabalhadorHandler)
+	routes.EmpresaRegisterRoutes(e, empresaHandler)
+	routes.DepartamentoRegisterRoutes(e, departamentoHandler)
 
 	e.Logger.Fatal(e.Start(":" + port))
 }
