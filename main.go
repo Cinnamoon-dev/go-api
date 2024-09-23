@@ -1,76 +1,49 @@
 package main
 
 import (
-	"net/http"
-	"os"
-	"time"
-
+	"github.com/Cinnamoon-dev/go-api/db"
+	"github.com/Cinnamoon-dev/go-api/handlers"
+	"github.com/Cinnamoon-dev/go-api/repositories"
+	"github.com/Cinnamoon-dev/go-api/routes"
+	"github.com/Cinnamoon-dev/go-api/services"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"log"
+	"os"
 )
 
-type Album struct {
-	ID    uint64 `gorm:"primaryKey"`
-	Title string
-}
+// inicializacao da aplicacao
+func main() {
 
-type Foto struct {
-	ID      uint64 `gorm:"primaryKey"`
-	AlbumID uint64 `gorm:"foreignKey:cu"`
-	Uri     string
-
-	Album Album
-}
-
-type Usuario struct {
-	ID        uint64 `gorm:"primaryKey"`
-	FotoID    uint64 `gorm:"primaryKey"`
-	Nome      string
-	Email     string
-	Data_nasc time.Time
-	Website   string
-	Gender    string
-	Telephone string
-
-	Foto Foto
-	//Seguidores []Seguidores `gorm:"foreignKey:UserID"`
-	//Seguidos   []Seguidores `gorm:"foreignKey:FollowerID"`
-}
-
-//type Seguidores struct {
-//	ID         uint64 `gorm:"primaryKey"`
-//	SeguidoID  uint64 `gorm:"foreignKey:UsuarioID"`
-//	SeguidorID uint64 `gorm:"foreignKey:SeguidorID"`
-//
-//	Usuario  Usuario `gorm:"foreignKey:UserID"`
-//	Seguidor Usuario `gorm:"foreignKey:FollowerID"`
-//}
-
-func getDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	err := godotenv.Load()
 	if err != nil {
-		return nil, err
+		log.Fatal("Error loading .env file")
 	}
 
-	return db, nil
-}
-
-func home(c echo.Context) error {
-	return c.JSON(http.StatusOK, echo.Map{"message": "hello"})
-}
-
-func main() {
-	db, err := getDB()
+	database, err := db.Init()
 	if err != nil {
 		panic("Failed to connect to database")
 	}
 
-	db.AutoMigrate(&Album{}, &Foto{}, &Usuario{})
+	trabalhadorRepo := repositories.NewTrabalhadorRepository(database)
+	trabalhadorService := services.NewTrabalhadorService(trabalhadorRepo)
+	trabalhadorHandler := handlers.NewTrabalhadorHandler(trabalhadorService)
+
+	empresaRepo := repositories.NewEmpresaRepository(database)
+	empresaService := services.NewEmpresaService(empresaRepo)
+	empresaHandler := handlers.NewEmpresaHandler(empresaService)
+
+	departamentoRepo := repositories.NewDepartamentoRepository(database)
+	departamentoService := services.NewDepartamentoService(departamentoRepo)
+	departamentoHandler := handlers.NewDepartamentoHandler(departamentoService)
+
+	port := os.Getenv("PORT")
 
 	e := echo.New()
 
-	e.GET("/", home)
+	routes.TrabalhadorRegisterRoutes(e, trabalhadorHandler)
+	routes.EmpresaRegisterRoutes(e, empresaHandler)
+	routes.DepartamentoRegisterRoutes(e, departamentoHandler)
 
-	e.Logger.Fatal(e.Start(os.Getenv("PORT")))
+	e.Logger.Fatal(e.Start(":" + port))
 }

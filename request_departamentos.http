@@ -1,0 +1,60 @@
+### Inserir um Novo Trabalhador 1
+POST http://localhost:6000/departamentos
+Content-Type: application/json
+
+{
+  "nome": "RH"
+}
+###
+
+### Inserir um Novo Trabalhador 2
+POST http://localhost:6000/departamentos
+Content-Type: application/json
+
+{
+  "nome": "Marketing"
+}
+###
+
+### Inserir um Novo Trabalhador 3
+POST http://localhost:6000/departamentos
+Content-Type: application/json
+
+{
+  "nome": "Suporte"
+}
+###
+
+### Inserir um Novo Trabalhador 4
+POST http://localhost:6000/departamentos
+Content-Type: application/json
+
+{
+  "nome": "Financeiro"
+}
+###
+
+
+### Listar Todos os Departamentos
+GET http://localhost:6000/departamentos
+Accept: application/json
+###
+
+### Buscar um Departamento pelo ID
+GET http://localhost:6000/departamentos/1
+Accept: application/json
+###
+
+### Atualizar um Departamento Existente
+PUT http://localhost:6000/departamentos/2
+Content-Type: application/json
+
+{
+  "nome": "Tecnologia"
+}
+###
+
+### Excluir um Departamento
+DELETE http://localhost:6000/departamentos/2
+Accept: application/json
+###
